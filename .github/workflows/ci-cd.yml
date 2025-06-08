@@ -33,18 +33,18 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}
 
       - name: Update GitOps repository
-        shell: pwsh
+        shell: powershell  # Use "powershell" instead of "pwsh"
         env:
-          GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
+         GIT_TOKEN: ${{ secrets.GITOPS_PAT }}
         run: |
           # Configure git credentials
           git config --global credential.helper store
-          "https://${env:GIT_TOKEN}:x-oauth-basic@github.com" | Out-File -FilePath "$env:USERPROFILE\.git-credentials" -Encoding ASCII
+          "https://$env:GIT_TOKEN:x-oauth-basic@github.com" | Out-File -FilePath "$env:USERPROFILE\.git-credentials" -Encoding ASCII
 
           # Clean up and clone repo
           Remove-Item -Recurse -Force gitops -ErrorAction SilentlyContinue
           git clone https://github.com/maaz2020/grade-api-gitops.git gitops
-          Set-Location gitops
+          cd gitops
 
           # Update image tag
           (Get-Content deployment.yaml) -replace "image: ghcr.io/maaz2020/kubernetes-cicd-tutorial:.*", "image: ghcr.io/maaz2020/kubernetes-cicd-tutorial:${{ github.sha }}" | Set-Content deployment.yaml
@@ -54,4 +54,4 @@ jobs:
           git config --global user.email "actions@github.com"
           git add deployment.yaml
           git commit -m "Update image to ${{ github.sha }}"
-          git push -f "https://${env:GIT_TOKEN}@github.com/maaz2020/grade-api-gitops.git" main
+    git push -f "https://$env:GIT_TOKEN@github.com/maaz2020/grade-api-gitops.git" main
